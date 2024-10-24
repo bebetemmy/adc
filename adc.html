@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADC Simulation: Analog to Digital Conversion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding-top: 50px;
+        }
+        #analogInput, #digitalOutput {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        #slider {
+            width: 60%;
+        }
+        #chart {
+            margin: 50px auto;
+            width: 60%;
+        }
+        .observation-section {
+            margin-top: 40px;
+        }
+        .observation-section textarea {
+            width: 80%;
+            height: 150px;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 1em;
+        }
+        .observation-section button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #4682b4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .observation-section button:hover {
+            background-color: #315f7f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ADC Simulation: Analog to Digital Conversion</h1>
+        <p>Most sensors take analogue measurements. These measurements can vary in amplitude or frequency. However, all computers need digital data to process information. The ADC converts an analogue signal to digital. This simulation demonstrates the process.</p>
+        
+        <div id="analogInput">Analog Input: 0.00 V</div>
+        <input type="range" min="0" max="5" step="0.01" value="0" id="slider">
+        <div id="digitalOutput">Digital Output: 00000000 (0)</div>
+        
+        <canvas id="chart" width="600" height="400"></canvas>
+        
+        
+    </div>
+    
+    <script>
+        const slider = document.getElementById('slider');
+        const analogInput = document.getElementById('analogInput');
+        const digitalOutput = document.getElementById('digitalOutput');
+        const canvas = document.getElementById('chart');
+        const ctx = canvas.getContext('2d');
+        const observationTextarea = document.getElementById('observation');
+        const observationResult = document.getElementById('observationResult');
+
+        // Function to convert analog value to digital using 8-bit ADC
+        function analogToDigital(analogValue) {
+            const maxAnalog = 5;  // Assuming maximum analog input is 5V
+            const maxDigital = 255;  // 8-bit ADC can represent 256 levels (0-255)
+            const digitalValue = Math.round((analogValue / maxAnalog) * maxDigital);
+            return digitalValue;
+        }
+
+        // Function to update the chart
+        function updateChart(analogValue, digitalValue) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw analog signal (sine wave)
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            for (let x = 0; x <= canvas.width; x++) {
+                const y = (canvas.height / 2) + Math.sin(x / 100) * (analogValue / 5) * 200;
+                ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = '#ff6347';
+            ctx.stroke();
+            ctx.closePath();
+
+            // Draw digital signal (rectangular approximation)
+            ctx.beginPath();
+            const digitalHeight = canvas.height - (digitalValue / 255) * canvas.height;
+            ctx.moveTo(0, digitalHeight);
+            ctx.lineTo(canvas.width, digitalHeight);
+            ctx.strokeStyle = '#4682b4';
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // Function to update the displayed values and chart
+        function update() {
+            const analogValue = parseFloat(slider.value);
+            const digitalValue = analogToDigital(analogValue);
+            analogInput.textContent = `Analog Input: ${analogValue.toFixed(2)} V`;
+            digitalOutput.textContent = `Digital Output: ${digitalValue.toString(2).padStart(8, '0')} (${digitalValue})`;
+
+            // Update the chart
+            updateChart(analogValue, digitalValue);
+        }
+
+        
+        // Initialize
+        slider.addEventListener('input', update);
+        update();
+    </script>
+</body>
+</html>
